@@ -1,0 +1,32 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: vision-stays-app-ing
+spec:
+  ingressClassName: nginx
+  tls:
+  - secretName: tls-secret
+  rules:
+  - http:
+      paths:
+      - path: /vs-hotels
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: hotel-service-svc
+            port:
+              number: 8081
+      - path: /vs-customers
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: customer-service-svc
+            port:
+              number: 8081
+      - path: /vs-bookings
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: booking-service-svc
+            port:
+              number: 8081
