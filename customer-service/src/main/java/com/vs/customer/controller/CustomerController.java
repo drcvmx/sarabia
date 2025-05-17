@@ -3,6 +3,7 @@ package com.vs.customer.controller;
 import com.vs.customer.dto.CustomerDTO;
 import com.vs.customer.dto.CustomerDetailsDTO;
 import com.vs.customer.dto.JwtTokenDTO;
+import com.vs.customer.model.Customer;
 import com.vs.customer.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ import java.util.logging.Logger;
 
 @RestController
 @CrossOrigin
+@RequestMapping("/vs-customers/api")
 public class CustomerController {
     final Logger logger = Logger.getLogger(CustomerController.class.getName());
 
@@ -50,9 +52,8 @@ public class CustomerController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> signUp(@RequestBody CustomerDTO customer) throws Exception {
-        customer.setPassword(passwordEncoder.encode(customer.getPassword()));
-        return ResponseEntity.ok(customerService.saveCustomer(customer));
+    public Customer signUp(@RequestBody Customer customer) {
+        return customerService.saveCustomer(customer);
     }
 
     @GetMapping("/customers/{id}")
