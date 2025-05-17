@@ -82,6 +82,20 @@
 			<version>${jersey.version}</version>
 		</dependency>
 
+                <!-- JSON (solo si se usa) -->
+                <dependency>
+                    <groupId>javax.json</groupId>
+                    <artifactId>javax.json-api</artifactId>
+                    <version>1.1.4</version>
+                </dependency>
+
+                <!-- Apache Commons (solo si se usan) -->
+                <dependency>
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-lang3</artifactId>
+                    <version>3.12.0</version>
+                </dependency>
+
 	</dependencies>
 
 	<build>
