@@ -17,7 +17,6 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>11</java.version>
-                <jersey.version>2.34</jersey.version>
 	</properties>
 
 	<dependencies>
@@ -29,11 +28,14 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-rest</artifactId>
 		</dependency>
-
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
+		</dependency>
                 <dependency>
 			<groupId>com.oracle.database.jdbc</groupId>
 			<artifactId>ojdbc8</artifactId>
-			<version>21.5.0.0</version>
+			<version>19.7.0.0</version>
 		</dependency>	
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -45,57 +47,6 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-security</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.jsonwebtoken</groupId>
-			<artifactId>jjwt</artifactId>
-			<version>0.9.1</version>
-		</dependency>
-
-                <dependency>
-                        <groupId>org.springframework.security</groupId>
-                        <artifactId>spring-security-config</artifactId>
-                        <version>5.5.3</version>
-                </dependency>
-                <dependency>
-                        <groupId>org.springframework.security</groupId>
-                        <artifactId>spring-security-web</artifactId>
-                        <version>5.5.3</version>
-                </dependency>
-
-                <dependency>
-			<groupId>org.glassfish.jersey.core</groupId>
-			<artifactId>jersey-client</artifactId>
-			<version>${jersey.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.glassfish.jersey.inject</groupId>
-			<artifactId>jersey-hk2</artifactId>
-			<version>${jersey.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.glassfish.jersey.media</groupId>
-			<artifactId>jersey-media-json-jackson</artifactId>
-			<version>${jersey.version}</version>
-		</dependency>
-
-                <!-- JSON (solo si se usa) -->
-                <dependency>
-                    <groupId>javax.json</groupId>
-                    <artifactId>javax.json-api</artifactId>
-                    <version>1.1.4</version>
-                </dependency>
-
-                <!-- Apache Commons (solo si se usan) -->
-                <dependency>
-                    <groupId>org.apache.commons</groupId>
-                    <artifactId>commons-lang3</artifactId>
-                    <version>3.12.0</version>
-                </dependency>
-
 	</dependencies>
 
 	<build>

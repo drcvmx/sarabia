@@ -2,68 +2,52 @@ package com.vs.customer.controller;
 
 import com.vs.customer.dto.CustomerDTO;
 import com.vs.customer.dto.CustomerDetailsDTO;
-import com.vs.customer.dto.JwtTokenDTO;
-import com.vs.customer.model.Customer;
+import com.vs.customer.exception.CustomerNotFoundException;
 import com.vs.customer.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @RestController
+@RequestMapping("/customers")
 @CrossOrigin
-@RequestMapping("/vs-customers/api")
+@Validated
 public class CustomerController {
-    final Logger logger = Logger.getLogger(CustomerController.class.getName());
+    private final Logger logger = Logger.getLogger(CustomerController.class.getName());
 
     @Autowired
-    private AuthenticationManager authenticationManager;
+    private CustomerService customerService;
 
-    @Autowired
-    private JwtTokenHelper jwtTokenHelper;
-
-    @Autowired
-    CustomerService customerService;
-
-    @Autowired
-    private UserDetailsService jwtUserDetailsService;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @RequestMapping(value = "/signin", method = RequestMethod.POST)
-    public ResponseEntity<?> signIn(@RequestBody CustomerDTO customer) throws Exception {
-        final UserDetails userDetails = jwtUserDetailsService.loadUserByUsername(customer.getId());
-        final String token = jwtTokenHelper.generateToken(userDetails);
-
-        JwtTokenDTO jwtTokenDTO = new JwtTokenDTO();
-        jwtTokenDTO.setJwtToken(token);
-
-        logger.info("Customer " + customer.getId() + " signed in....");
-
-        return ResponseEntity.ok(jwtTokenDTO);
+    @PostMapping
+    public ResponseEntity<CustomerDTO> createCustomer(@Valid @RequestBody CustomerDTO customer) {
+        logger.log(Level.INFO, "Creando nuevo cliente: {0}", customer.getId());
+        CustomerDTO savedCustomer = customerService.saveCustomer(customer);
+        return new ResponseEntity<>(savedCustomer, HttpStatus.CREATED);
     }
 
-    @PostMapping("/signup")
-    public Customer signUp(@RequestBody Customer customer) {
-        return customerService.saveCustomer(customer);
-    }
-
-    @GetMapping("/customers/{id}")
-    private CustomerDetailsDTO getCustomer(@PathVariable("id") String id) {
-        CustomerDetailsDTO retVal = new CustomerDetailsDTO();
+    @GetMapping("/{id}")
+    public ResponseEntity<CustomerDetailsDTO> getCustomer(@PathVariable("id") String id) {
+        logger.log(Level.INFO, "Buscando cliente con ID: {0}", id);
         try {
-            retVal = customerService.getCustomerDetails(id);
-        } catch (Throwable e) {
-            e.printStackTrace();
+            CustomerDetailsDTO customer = customerService.getCustomerDetails(id);
+            return ResponseEntity.ok(customer);
+        } catch (CustomerNotFoundException e) {
+            logger.log(Level.WARNING, "Cliente no encontrado: {0}", id);
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error al buscar cliente: " + id, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-        return retVal;
+    }
+
+    @ExceptionHandler(CustomerNotFoundException.class)
+    public ResponseEntity<String> handleCustomerNotFound(CustomerNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
 }
