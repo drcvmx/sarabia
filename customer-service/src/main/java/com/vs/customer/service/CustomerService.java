@@ -5,25 +5,27 @@ import com.vs.customer.dto.CustomerDetailsDTO;
 import com.vs.customer.entity.Customer;
 import com.vs.customer.exception.CustomerNotFoundException;
 import com.vs.customer.repository.CustomerRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import lombok.RequiredArgsConstructor;
 
 import javax.validation.Valid;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Service
-@Transactional
+@RequiredArgsConstructor
 public class CustomerService {
     private final Logger logger = Logger.getLogger(CustomerService.class.getName());
 
-    @Autowired
-    private CustomerRepository repository;
+    private final CustomerRepository customerRepository;
+    private final ObjectMapper objectMapper;
 
     public CustomerDTO getCustomerById(String id) {
         logger.log(Level.INFO, "Buscando cliente por ID: {0}", id);
-        Customer customer = repository.findById(id)
+        Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> new CustomerNotFoundException(id));
         return convertToDTO(customer);
     }
@@ -37,30 +39,33 @@ public class CustomerService {
         return details;
     }
 
-    public CustomerDTO saveCustomer(@Valid CustomerDTO customerDTO) {
+    @Transactional
+    public CustomerDTO saveCustomer(CustomerDTO customerDTO) {
         logger.log(Level.INFO, "Guardando cliente: {0}", customerDTO.getId());
         try {
-            Customer customer = convertToEntity(customerDTO);
-            customer = repository.save(customer);
+            Customer customer = new Customer();
+            customer.setId(customerDTO.getId());
+            customer.setCustomerDetails(objectMapper.writeValueAsString(customerDTO));
+            customer = customerRepository.save(customer);
             logger.log(Level.INFO, "Cliente guardado exitosamente: {0}", customer.getId());
-            return convertToDTO(customer);
+            return customerDTO;
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Error al guardar cliente: " + customerDTO.getId(), e);
-            throw new RuntimeException("Error al guardar el cliente: " + e.getMessage());
+            logger.log(Level.SEVERE, "Error al guardar el cliente: " + e.getMessage(), e);
+            throw new RuntimeException("Error al guardar el cliente", e);
         }
     }
 
     private CustomerDTO convertToDTO(Customer customer) {
-        CustomerDTO dto = new CustomerDTO();
-        dto.setId(customer.getId());
-        dto.setCustomerName(customer.getCustomerName());
-        return dto;
-    }
-
-    private Customer convertToEntity(CustomerDTO dto) {
-        Customer customer = new Customer();
-        customer.setId(dto.getId());
-        customer.setCustomerName(dto.getCustomerName());
-        return customer;
+        try {
+            if (customer.getCustomerDetails() != null) {
+                return objectMapper.readValue(customer.getCustomerDetails(), CustomerDTO.class);
+            }
+            CustomerDTO dto = new CustomerDTO();
+            dto.setId(customer.getId());
+            return dto;
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error al convertir cliente a DTO: " + e.getMessage(), e);
+            throw new RuntimeException("Error al convertir cliente a DTO", e);
+        }
     }
 }

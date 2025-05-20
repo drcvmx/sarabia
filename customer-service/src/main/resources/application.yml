@@ -4,22 +4,23 @@ spring:
       on-profile: dev
   application:
     name: customers
-  server:
-    port: 8080
   datasource:
+    driver-class-name: oracle.jdbc.OracleDriver
     url: jdbc:oracle:thin:@129.146.184.44:1521/FREEPDB1
     username: vs
     password: Oracle1
   jpa:
-    database: oracle
+    database-platform: org.hibernate.dialect.Oracle12cDialect
     hibernate:
-      naming_strategy: org.hibernate.cfg.ImprovedNamingStrategy
-      show-sql: true
-      ddl-auto: update
+      ddl-auto: validate
+    show-sql: true
     properties:
       hibernate:
+        format_sql: true
         dialect: org.hibernate.dialect.Oracle12cDialect
+        globally_quoted_identifiers: true
 server:
+  port: 8080
   servlet:
     context-path: /vs-customers/api
 logging:
@@ -27,6 +28,48 @@ logging:
     com:
       vs:
         customer: DEBUG
+    org:
+      hibernate:
+        SQL: DEBUG
+        type:
+          descriptor:
+            sql:
+              BasicBinder: TRACE
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+  application:
+    name: customers
+  datasource:
+    driver-class-name: oracle.jdbc.OracleDriver
+    url: jdbc:oracle:thin:@129.146.184.44:1521/FREEPDB1
+    username: vs
+    password: Oracle1
+  jpa:
+    database-platform: org.hibernate.dialect.Oracle12cDialect
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        dialect: org.hibernate.dialect.Oracle12cDialect
+        globally_quoted_identifiers: true
+server:
+  port: 8080
+  servlet:
+    context-path: /vs-customers/api
+logging:
+  level:
+    com:
+      vs:
+        customer: INFO
+    org:
+      hibernate:
+        SQL: INFO
 oci:
   tenant:
     config: oci
@@ -36,43 +79,3 @@ oci:
     stream-ocid:
     message-endpoint:
     topic-ocid:
-
----
-spring:
-  config:
-    activate:
-      on-profile: prod
-  application:
-    name: customers
-  server:
-    port: 8080
-  datasource:
-    url: jdbc:oracle:thin:@129.146.184.44:1521/FREEPDB1
-    username: vs
-    password: Oracle1
-  jpa:
-    database: oracle
-    hibernate:
-      naming_strategy: org.hibernate.cfg.ImprovedNamingStrategy
-      show-sql: true
-      ddl-auto: update
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.Oracle12cDialect
-server:
-  servlet:
-    context-path: /vs-customers/api
-logging:
-  level:
-    com:
-      vs:
-        customer: DEBUG
-oci:
-  tenant:
-    config: oci
-    region: 
-    adb-username-ocid: 
-    adb-password-ocid: 
-    stream-ocid: 
-    message-endpoint: 
-    topic-ocid: 
